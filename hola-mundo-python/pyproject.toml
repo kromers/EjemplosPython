@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "hola-mundo-python"
+version = "0.1.0"
+description = "Un proyecto simple que imprime 'Hola Mundo' en la consola."
+authors = ["Tu Nombre <tu.email@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
