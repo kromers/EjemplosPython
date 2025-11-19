@@ -2,9 +2,58 @@
 
 Este proyecto es una simple aplicación en Python que imprime "Hola Mundo" en la consola.
 
-git config --global user.email javitrapero@gmail.com
+## Instalación y Configuración
 
-git config --global user.name javitrapero
+### 1. Crear un Entorno Virtual
+
+```powershell
+python -m venv venv
+```
+
+### 2. Activar el Entorno Virtual
+
+**En PowerShell:**
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+**En CMD:**
+```cmd
+venv\Scripts\activate.bat
+```
+
+### 3. Instalar Dependencias
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+## Instrucciones para Ejecutar
+
+### Ejecutar la aplicación:
+
+```powershell
+python src\main.py
+```
+
+### Ejecutar los tests:
+
+```powershell
+python tests\test_main.py
+```
+
+O con unittest discover:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+## Configuración de GIT
+
+```powershell
+git config --global user.email tu_email@ejemplo.com
+git config --global user.name tu_nombre
+```
 
 ## Estructura del Proyecto
 

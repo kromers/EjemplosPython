@@ -1,1 +1,5 @@
-# Este archivo está intencionalmente en blanco.
+# Dependencias del proyecto Hola Mundo
+# Sin dependencias externas requeridas para la ejecución
+
+# Dependencias de desarrollo (opcionales)
+# pytest>=7.0  # Descomenta si usas pytest para tests
