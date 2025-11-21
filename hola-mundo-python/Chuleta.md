@@ -2,6 +2,8 @@
 git config --global user.email javitrapero@gmail.com
 git config --global user.name javitrapero
 
+# Terminal
+Abrir un nuevo terminal: Ctrl + j
 
 # Entornos virtuales
 python -m venv <nombreEntorno>
