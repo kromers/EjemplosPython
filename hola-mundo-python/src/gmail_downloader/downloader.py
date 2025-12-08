@@ -124,7 +124,20 @@ class GmailAttachmentDownloader:
         try:
             filename = part["filename"]
             
-            if filename:
+            if filename and filename.lower().endswith('.pdf'):
+                # Listas de filtrado
+                white_list = ["factura", "invoice"]
+                black_list = ["proforma"]
+                
+                filename_lower = filename.lower()
+                
+                # Verificar que contiene una palabra de la whitelist y no contiene palabras de la blacklist
+                has_white_list_word = any(word in filename_lower for word in white_list)
+                has_black_list_word = any(word in filename_lower for word in black_list)
+                
+                if not (has_white_list_word and not has_black_list_word):
+                    return
+                
                 # Crear carpeta con nombre del remitente
                 sender_folder = self.download_folder / self._sanitize_filename(sender)
                 sender_folder.mkdir(exist_ok=True)

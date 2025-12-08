@@ -15,7 +15,8 @@ class GmailAuthenticator:
 
     SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
     TOKEN_FILE = "config/token.pickle"
-    CREDENTIALS_FILE = "config/credentials.json"
+    # CREDENTIALS_FILE = "config/credentials.json"
+    CREDENTIALS_FILE = "config/GmailKromers_credentials.json"
 
     def __init__(self, credentials_file: str = CREDENTIALS_FILE):
         """
