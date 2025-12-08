@@ -6,6 +6,7 @@ import base64
 import os
 from typing import List
 from pathlib import Path
+from datetime import datetime
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
@@ -92,6 +93,12 @@ class GmailAttachmentDownloader:
                 (h["value"] for h in headers if h["name"] == "Subject"), "Sin asunto"
             )
             sender = next((h["value"] for h in headers if h["name"] == "From"), "Desconocido")
+            
+            # Obtener fecha del correo
+            date_str = next(
+                (h["value"] for h in headers if h["name"] == "Date"), None
+            )
+            email_date = self._parse_email_date(date_str) if date_str else datetime.now()
 
             # Procesar partes del mensaje
             parts = message["payload"].get("parts", [])
@@ -103,7 +110,7 @@ class GmailAttachmentDownloader:
             for part in parts:
                 if part["filename"]:
                     has_attachments = True
-                    self._download_attachment(part, msg_id, subject, sender)
+                    self._download_attachment(part, msg_id, subject, sender, email_date)
 
             if has_attachments:
                 self.stats["emails_with_attachments"] += 1
@@ -111,7 +118,7 @@ class GmailAttachmentDownloader:
         except Exception as e:
             print(f"⚠️ Error procesando mensaje {msg_id}: {e}")
 
-    def _download_attachment(self, part: dict, msg_id: str, subject: str, sender: str) -> None:
+    def _download_attachment(self, part: dict, msg_id: str, subject: str, sender: str, email_date: datetime) -> None:
         """
         Descarga un adjunto específico
 
@@ -120,6 +127,7 @@ class GmailAttachmentDownloader:
             msg_id: ID del mensaje
             subject: Asunto del correo
             sender: Remitente del correo
+            email_date: Fecha del correo
         """
         try:
             filename = part["filename"]
@@ -138,9 +146,13 @@ class GmailAttachmentDownloader:
                 if not (has_white_list_word and not has_black_list_word):
                     return
                 
-                # Crear carpeta con nombre del remitente
-                sender_folder = self.download_folder / self._sanitize_filename(sender)
-                sender_folder.mkdir(exist_ok=True)
+                # Extraer año y trimestre
+                year = email_date.year
+                trimester = self._get_trimester(email_date.month)
+                
+                # Crear estructura: adjuntos/<Año>/<Trimestre>/<Remitente>/
+                folder_path = self.download_folder / str(year) / trimester / self._sanitize_filename(sender)
+                folder_path.mkdir(parents=True, exist_ok=True)
 
                 # Obtener datos del adjunto
                 att_id = part["body"].get("attachmentId")
@@ -154,7 +166,7 @@ class GmailAttachmentDownloader:
                     )
 
                     data = base64.urlsafe_b64decode(attachment["data"])
-                    filepath = sender_folder / self._sanitize_filename(filename)
+                    filepath = folder_path / self._sanitize_filename(filename)
 
                     with open(filepath, "wb") as f:
                         f.write(data)
@@ -164,6 +176,42 @@ class GmailAttachmentDownloader:
 
         except Exception as e:
             print(f"⚠️ Error descargando adjunto {filename}: {e}")
+
+    @staticmethod
+    def _get_trimester(month: int) -> str:
+        """
+        Obtiene el trimestre basado en el mes
+
+        Args:
+            month: Número del mes (1-12)
+
+        Returns:
+            str: Trimestre (Q1, Q2, Q3, Q4)
+        """
+        trimester_map = {
+            1: "T1", 2: "T1", 3: "T1",
+            4: "T2", 5: "T2", 6: "T2",
+            7: "T3", 8: "T3", 9: "T3",
+            10: "T4", 11: "T4", 12: "T4"
+        }
+        return trimester_map.get(month, "T1")
+
+    @staticmethod
+    def _parse_email_date(date_str: str) -> datetime:
+        """
+        Parsea la fecha del correo en formato RFC 2822
+
+        Args:
+            date_str: Fecha en formato RFC 2822 (ej: "Mon, 15 Dec 2024 10:30:45 +0000")
+
+        Returns:
+            datetime: Objeto datetime con la fecha
+        """
+        try:
+            from email.utils import parsedate_to_datetime
+            return parsedate_to_datetime(date_str)
+        except Exception:
+            return datetime.now()
 
     @staticmethod
     def _sanitize_filename(filename: str) -> str:
