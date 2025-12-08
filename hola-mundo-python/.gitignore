@@ -5,6 +5,7 @@ ENV/
 
 # Credenciales y tokens
 config/credentials.json
+config/GmailKromers_credentials.json
 config/token.pickle
 
 # Descargas
