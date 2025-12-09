@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-🚀 INICIO RÁPIDO - Gmail Attachment Downloader
+🚀 INICIO RÁPIDO - AttachDownloader
 
 Ejecuta este archivo para obtener instrucciones paso a paso
 """

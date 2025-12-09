@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Gmail Attachment Downloader
-Script principal para descargar adjuntos de Gmail
+AttachDownloader - Herramienta profesional para descargar y organizar adjuntos de Gmail
+Estructura inteligente: <Año>/<Trimestre>/<Remitente>/
 """
 
 import sys
@@ -19,7 +19,7 @@ from gmail_downloader.downloader import GmailAttachmentDownloader
 def main():
     """Función principal"""
     print("=" * 50)
-    print("🚀 Gmail Attachment Downloader")
+    print("🚀 AttachDownloader")
     print("=" * 50)
 
     try:

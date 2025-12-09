@@ -1,5 +1,6 @@
 """
-Módulo de autenticación para Gmail API
+AttachDownloader - Módulo de autenticación para Gmail API
+Gestión segura de credenciales OAuth 2.0
 """
 
 import os

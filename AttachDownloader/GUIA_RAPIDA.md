@@ -1,4 +1,4 @@
-# 🚀 Guía Rápida - Gmail Attachment Downloader
+# 🚀 Guía Rápida - AttachDownloader
 
 ## Instalación Rápida (5 minutos)
 

@@ -1,8 +1,8 @@
-# 📋 Resumen del Proyecto: Gmail Attachment Downloader
+# 📋 Resumen del Proyecto: AttachDownloader
 
 ## ¿Qué se creó?
 
-Un programa completo en Python que **se conecta a tu cuenta de Gmail mediante OAuth 2.0** y **descarga automáticamente todos los adjuntos** de tus correos, organizándolos por remitente.
+Una herramienta profesional completa en Python que **se conecta a tu cuenta de Gmail mediante OAuth 2.0** y **descarga automáticamente adjuntos** de tus correos, organizándolos inteligentemente en estructura: `<Año>/<Trimestre>/<Remitente>/`
 
 ## 📂 Estructura del Proyecto
 

@@ -1,19 +1,20 @@
-# 🚀 Gmail Attachment Downloader
+# 🚀 AttachDownloader
 
-**Un programa en Python que descarga automáticamente todos los adjuntos de tus correos de Gmail.**
+**Un programa profesional en Python que descarga y organiza automáticamente adjuntos de Gmail con estructura inteligente por año, trimestre y remitente.**
 
-> Este proyecto es mucho más ambicioso que un "Hola Mundo" - es una aplicación completa que se conecta a Gmail mediante OAuth 2.0 y descarga de forma inteligente todos tus archivos adjuntos.
+> AttachDownloader es una herramienta empresarial que se conecta a Gmail mediante OAuth 2.0 y gestiona de forma inteligente todos tus archivos adjuntos, especialmente facturas y documentos comerciales.
 
 ## ✨ Características
 
 - ✅ **Autenticación OAuth 2.0** segura con Google
-- ✅ **Descarga automática** de TODOS los adjuntos
-- ✅ **Organización inteligente** de archivos por remitente
+- ✅ **Descarga automática** de todos los adjuntos
+- ✅ **Organización inteligente** por año, trimestre y remitente
+- ✅ **Filtrado de documentos** (facturas, invoices, etc.)
 - ✅ **Sanitización** de nombres de archivo
 - ✅ **Estadísticas detalladas** de descarga
 - ✅ **Caché automático** de credenciales
 - ✅ **Manejo robusto** de errores
-- ✅ **Documentación exhaustiva** (6 archivos)
+- ✅ **Documentación exhaustiva**
 
 ## 📚 Documentación
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Script de instalación interactivo
+Script de instalación interactivo para AttachDownloader
 Realiza los primeros pasos automáticamente
 """
 

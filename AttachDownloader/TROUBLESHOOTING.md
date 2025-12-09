@@ -1,4 +1,4 @@
-# 🔧 Guía Avanzada de Troubleshooting
+# 🔧 Guía Avanzada de Troubleshooting - AttachDownloader
 
 ## ❌ Errores Comunes y Soluciones
 

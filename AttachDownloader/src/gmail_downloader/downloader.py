@@ -1,5 +1,6 @@
 """
-Módulo para descargar adjuntos de Gmail
+AttachDownloader - Módulo para descargar y organizar adjuntos de Gmail
+Estructura inteligente: <Año>/<Trimestre>/<Remitente>/
 """
 
 import base64
