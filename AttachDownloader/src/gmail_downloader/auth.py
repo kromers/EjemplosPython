@@ -5,28 +5,28 @@ Gestión segura de credenciales OAuth 2.0
 
 import os
 import pickle
+from pathlib import Path
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google.auth.exceptions import RefreshError
 from google_auth_oauthlib.flow import InstalledAppFlow
+from .config import ConfigManager
 
 
 class GmailAuthenticator:
     """Clase para manejar la autenticación con Gmail API"""
 
-    SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
-    TOKEN_FILE = "config/token.pickle"
-    # CREDENTIALS_FILE = "config/credentials.json"
-    CREDENTIALS_FILE = "config/GmailKromers_credentials.json"
-
-    def __init__(self, credentials_file: str = CREDENTIALS_FILE):
+    def __init__(self, config: ConfigManager = None):
         """
         Inicializa el autenticador
 
         Args:
-            credentials_file: Ruta al archivo de credenciales JSON
+            config: Instancia de ConfigManager (si es None, carga la configuración por defecto)
         """
-        self.credentials_file = credentials_file
+        self.config = config or ConfigManager()
+        self.credentials_file = str(self.config.credentials_file)
+        self.token_file = str(self.config.token_file)
+        self.scopes = self.config.gmail_scopes
         self.creds = None
 
     def authenticate(self) -> Credentials:
@@ -37,8 +37,8 @@ class GmailAuthenticator:
             Credentials: Objeto de credenciales autenticado
         """
         # Cargar token existente si está disponible
-        if os.path.exists(self.TOKEN_FILE):
-            with open(self.TOKEN_FILE, "rb") as token:
+        if os.path.exists(self.token_file):
+            with open(self.token_file, "rb") as token:
                 self.creds = pickle.load(token)
 
         # Si no hay credenciales válidas, obtener nuevas
@@ -52,7 +52,7 @@ class GmailAuthenticator:
                 self._authorize_new()
 
             # Guardar credenciales para próximas ejecuciones
-            with open(self.TOKEN_FILE, "wb") as token:
+            with open(self.token_file, "wb") as token:
                 pickle.dump(self.creds, token)
 
         return self.creds
@@ -66,6 +66,6 @@ class GmailAuthenticator:
             )
 
         flow = InstalledAppFlow.from_client_secrets_file(
-            self.credentials_file, self.SCOPES
+            self.credentials_file, self.scopes
         )
         self.creds = flow.run_local_server(port=0)

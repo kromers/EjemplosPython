@@ -14,37 +14,46 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from gmail_downloader.auth import GmailAuthenticator
 from gmail_downloader.downloader import GmailAttachmentDownloader
+from gmail_downloader.config import ConfigManager
 
 
 def main():
     """Función principal"""
-    print("=" * 50)
-    print("🚀 AttachDownloader")
-    print("=" * 50)
+    print("=" * 70)
+    print("🚀 AttachDownloader - Descargador inteligente de adjuntos de Gmail")
+    print("=" * 70)
 
     try:
+        # Paso 0: Cargar configuración
+        print("\n⚙️  Cargando configuración...")
+        config = ConfigManager()
+        config.print_summary()
+        
         # Paso 1: Autenticación
-        print("\n📝 Autenticando con Gmail API...")
-        authenticator = GmailAuthenticator()
+        print("📝 Autenticando con Gmail API...")
+        authenticator = GmailAuthenticator(config)
         credentials = authenticator.authenticate()
         print("✅ Autenticación exitosa")
 
         # Paso 2: Descargar adjuntos
         print("\n📥 Iniciando descarga de adjuntos...")
-        downloader = GmailAttachmentDownloader(
-            credentials, download_folder="downloads"
-        )
+        print(f"   📂 Carpeta destino: {config.download_folder}")
+        print(f"   📋 Estructura: {config.folder_structure}")
+        print(f"   🔍 Filtros: {config.white_list if config.white_list else 'ninguno'}")
+        
+        downloader = GmailAttachmentDownloader(credentials, config)
         stats = downloader.download_all_attachments()
 
         # Paso 3: Mostrar resultados
-        print("\n" + "=" * 50)
-        print("📊 Estadísticas de descarga:")
-        print("=" * 50)
-        print(f"Total de correos: {stats['total_emails']}")
-        print(f"Correos con adjuntos: {stats['emails_with_attachments']}")
-        print(f"Archivos descargados: {stats['files_downloaded']}")
-        print("=" * 50)
-        print("✅ ¡Descarga completada!")
+        print("\n" + "=" * 70)
+        print("📊 ESTADÍSTICAS DE DESCARGA:")
+        print("=" * 70)
+        print(f"📧 Total de correos procesados: {stats['total_emails']}")
+        print(f"📎 Correos con adjuntos: {stats['emails_with_attachments']}")
+        print(f"✅ Archivos descargados: {stats['files_downloaded']}")
+        print(f"⏭️  Archivos filtrados: {stats.get('files_filtered', 0)}")
+        print("=" * 70)
+        print("✨ ¡Descarga completada con éxito!")
 
     except FileNotFoundError as e:
         print(f"\n❌ Error: {e}")
@@ -53,10 +62,14 @@ def main():
         print("2. Crea un nuevo proyecto")
         print("3. Habilita Gmail API")
         print("4. Crea credenciales OAuth 2.0 (Aplicación de escritorio)")
-        print("5. Descarga el archivo JSON y guárdalo como config/credentials.json")
+        print("5. Descarga el archivo JSON y guárdalo como:")
+        print("   → Ubicación: AttachDownloader/config/credentials.json")
+        print("\n6. Edita config/config.cfg con tus preferencias de filtrado")
 
     except Exception as e:
         print(f"\n❌ Error inesperado: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 

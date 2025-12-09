@@ -10,23 +10,30 @@ from pathlib import Path
 from datetime import datetime
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
+from .config import ConfigManager
 
 
 class GmailAttachmentDownloader:
     """Clase para descargar adjuntos de Gmail"""
 
-    def __init__(self, credentials: Credentials, download_folder: str = "downloads"):
+    def __init__(self, credentials: Credentials, config: ConfigManager = None):
         """
         Inicializa el descargador
 
         Args:
             credentials: Credenciales de Gmail API
-            download_folder: Carpeta donde guardar los adjuntos
+            config: Instancia de ConfigManager (si es None, carga la configuración por defecto)
         """
+        self.config = config or ConfigManager()
         self.service = build("gmail", "v1", credentials=credentials)
-        self.download_folder = Path(download_folder)
-        self.download_folder.mkdir(exist_ok=True)
-        self.stats = {"total_emails": 0, "emails_with_attachments": 0, "files_downloaded": 0}
+        self.download_folder = self.config.download_folder
+        self.download_folder.mkdir(parents=True, exist_ok=True)
+        self.stats = {
+            "total_emails": 0,
+            "emails_with_attachments": 0,
+            "files_downloaded": 0,
+            "files_filtered": 0,
+        }
 
     def download_all_attachments(self) -> dict:
         """
@@ -59,11 +66,15 @@ class GmailAttachmentDownloader:
             List[str]: Lista de IDs de mensajes
         """
         try:
+            max_emails = self.config.max_emails_to_process
+            
             results = self.service.users().messages().list(userId="me").execute()
             messages = results.get("messages", [])
 
             # Manejar paginación
             while "nextPageToken" in results:
+                if max_emails > 0 and len(messages) >= max_emails:
+                    break
                 results = (
                     self.service.users()
                     .messages()
@@ -71,6 +82,10 @@ class GmailAttachmentDownloader:
                     .execute()
                 )
                 messages.extend(results.get("messages", []))
+
+            # Aplicar límite
+            if max_emails > 0:
+                messages = messages[:max_emails]
 
             return [msg["id"] for msg in messages]
 
@@ -94,6 +109,17 @@ class GmailAttachmentDownloader:
                 (h["value"] for h in headers if h["name"] == "Subject"), "Sin asunto"
             )
             sender = next((h["value"] for h in headers if h["name"] == "From"), "Desconocido")
+            
+            # Filtrar por remitente si está configurado
+            if self.config.whitelist_senders:
+                sender_lower = sender.lower()
+                if not any(allowed in sender_lower for allowed in self.config.whitelist_senders):
+                    return
+            
+            if self.config.blacklist_senders:
+                sender_lower = sender.lower()
+                if any(blocked in sender_lower for blocked in self.config.blacklist_senders):
+                    return
             
             # Obtener fecha del correo
             date_str = next(
@@ -133,47 +159,73 @@ class GmailAttachmentDownloader:
         try:
             filename = part["filename"]
             
-            if filename and filename.lower().endswith('.pdf'):
-                # Listas de filtrado
-                white_list = ["factura", "invoice"]
-                black_list = ["proforma"]
-                
-                filename_lower = filename.lower()
-                
-                # Verificar que contiene una palabra de la whitelist y no contiene palabras de la blacklist
-                has_white_list_word = any(word in filename_lower for word in white_list)
-                has_black_list_word = any(word in filename_lower for word in black_list)
-                
-                if not (has_white_list_word and not has_black_list_word):
+            if not filename:
+                return
+            
+            # Verificar extensión permitida
+            if self.config.allowed_extensions:
+                file_ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+                if file_ext not in self.config.allowed_extensions:
+                    self.stats["files_filtered"] += 1
                     return
+            
+            # Aplicar filtros de lista blanca y negra
+            filename_check = filename if self.config.case_sensitive_filters else filename.lower()
+            
+            # Verificar lista blanca
+            if self.config.white_list:
+                white_list = self.config.white_list if self.config.case_sensitive_filters else [w.lower() for w in self.config.white_list]
+                if not any(word in filename_check for word in white_list):
+                    self.stats["files_filtered"] += 1
+                    return
+            
+            # Verificar lista negra
+            if self.config.black_list:
+                black_list = self.config.black_list if self.config.case_sensitive_filters else [b.lower() for b in self.config.black_list]
+                if any(word in filename_check for word in black_list):
+                    self.stats["files_filtered"] += 1
+                    return
+            
+            # Extraer año y trimestre
+            year = email_date.year
+            trimester = self._get_trimester(email_date.month)
+            
+            # Obtener nombre de la carpeta del remitente
+            sender_folder = sender
+            if self.config.use_domain_only and "@" in sender:
+                sender_folder = sender.split("@")[1].replace(">", "").strip()
+            
+            # Crear estructura: <download_folder>/<Año>/<Trimestre>/<Remitente>/
+            folder_path = self.download_folder / str(year) / trimester / self._sanitize_filename(sender_folder)
+            folder_path.mkdir(parents=True, exist_ok=True)
+
+            # Obtener datos del adjunto
+            att_id = part["body"].get("attachmentId")
+            if att_id:
+                attachment = (
+                    self.service.users()
+                    .messages()
+                    .attachments()
+                    .get(userId="me", messageId=msg_id, id=att_id)
+                    .execute()
+                )
+
+                data = base64.urlsafe_b64decode(attachment["data"])
+                filepath = folder_path / self._sanitize_filename(filename)
                 
-                # Extraer año y trimestre
-                year = email_date.year
-                trimester = self._get_trimester(email_date.month)
-                
-                # Crear estructura: adjuntos/<Año>/<Trimestre>/<Remitente>/
-                folder_path = self.download_folder / str(year) / trimester / self._sanitize_filename(sender)
-                folder_path.mkdir(parents=True, exist_ok=True)
+                # Manejar duplicados si está configurado
+                if filepath.exists() and self.config.add_timestamp_on_duplicate:
+                    name, ext = filename.rsplit(".", 1) if "." in filename else (filename, "")
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    new_filename = f"{name}_{timestamp}.{ext}" if ext else f"{name}_{timestamp}"
+                    filepath = folder_path / self._sanitize_filename(new_filename)
 
-                # Obtener datos del adjunto
-                att_id = part["body"].get("attachmentId")
-                if att_id:
-                    attachment = (
-                        self.service.users()
-                        .messages()
-                        .attachments()
-                        .get(userId="me", messageId=msg_id, id=att_id)
-                        .execute()
-                    )
+                with open(filepath, "wb") as f:
+                    f.write(data)
 
-                    data = base64.urlsafe_b64decode(attachment["data"])
-                    filepath = folder_path / self._sanitize_filename(filename)
-
-                    with open(filepath, "wb") as f:
-                        f.write(data)
-
+                if self.config.log_successful_downloads:
                     print(f"✅ Descargado: {filename} -> {filepath}")
-                    self.stats["files_downloaded"] += 1
+                self.stats["files_downloaded"] += 1
 
         except Exception as e:
             print(f"⚠️ Error descargando adjunto {filename}: {e}")
@@ -228,4 +280,14 @@ class GmailAttachmentDownloader:
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
             filename = filename.replace(char, "_")
+        
+        # Limitar longitud si está configurado
+        max_length = 255  # Por defecto
+        if len(filename) > max_length:
+            if "." in filename:
+                name, ext = filename.rsplit(".", 1)
+                filename = name[: max_length - len(ext) - 1] + "." + ext
+            else:
+                filename = filename[:max_length]
+        
         return filename
