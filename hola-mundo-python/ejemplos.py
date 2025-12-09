@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Ejemplo alternativo de uso del Gmail Downloader
-Demuestra diferentes formas de usar la librería
+Ejemplo alternativo de uso de AttachDownloader
+Demuestra diferentes formas de usar la herramienta
 """
 
 import sys
