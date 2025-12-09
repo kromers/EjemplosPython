@@ -78,19 +78,67 @@ Las credenciales se cargarán automáticamente desde `config/token.pickle`
 
 ## 📁 Estructura de Descarga
 
-Los archivos se descargarán en la carpeta `downloads/` organizados por remitente:
+Los archivos se descargarán en la carpeta `downloads/` organizados jerárquicamente por **año**, **trimestre** y **remitente**. Esta estructura avanzada facilita:
+- 📅 Organización cronológica por trimestres
+- 📧 Identificación del remitente
+- 🔍 Búsqueda rápida por período
+- 🗂️ Acceso ordenado y coherente
+
+### Estructura Jerárquica (Año/Trimestre/Remitente)
 
 ```
 downloads/
-├── usuario1@gmail.com/
-│   ├── archivo1.pdf
-│   ├── documento.docx
-│   └── imagen.jpg
-├── usuario2@gmail.com/
-│   ├── reporte.xlsx
-│   └── presentacion.pptx
-└── ...
+├── 2025/
+│   ├── T1/
+│   │   └── usuario1@gmail.com/
+│   │       ├── factura_001.pdf
+│   │       ├── invoice_002.pdf
+│   │       └── factura_003.pdf
+│   ├── T2/
+│   │   ├── usuario1@gmail.com/
+│   │   │   ├── factura_q2_001.pdf
+│   │   │   └── invoice_q2_002.pdf
+│   │   └── usuario2@gmail.com/
+│   │       └── factura_cliente.pdf
+│   ├── T3/
+│   │   └── usuario1@gmail.com/
+│   │       └── factura_q3_001.pdf
+│   └── T4/
+│       └── usuario2@gmail.com/
+│           ├── factura_final.pdf
+│           └── invoice_anual.pdf
+└── 2024/
+    ├── T4/
+    │   └── usuario1@gmail.com/
+    │       └── factura_2024.pdf
+    └── T1/
+        └── usuario2@gmail.com/
+            └── invoice_inicial.pdf
 ```
+
+### Filtrado Inteligente
+
+El sistema filtra automáticamente:
+- ✅ **Solo PDFs**: Se descargan únicamente archivos PDF
+- ✅ **Whitelist**: Contiene palabras clave: "factura", "invoice"
+- ✅ **Blacklist**: Excluye archivos con: "proforma"
+
+**Ejemplo de filtrado:**
+- ✅ `factura_2025_001.pdf` → Se descarga
+- ✅ `invoice_Q1_cliente.pdf` → Se descarga
+- ❌ `proforma_cotizacion.pdf` → NO se descarga
+- ❌ `documento.docx` → NO se descarga (no es PDF)
+
+### Ventajas de Esta Estructura
+
+| Ventaja | Descripción |
+|---------|-------------|
+| **Cronológica** | Documentos organizados por año y trimestre |
+| **Claridad** | Sabe exactamente de quién es cada archivo |
+| **Búsqueda rápida** | Navega por período + remitente |
+| **Auditoría** | Fácil seguimiento de documentación por período |
+| **Mantenimiento** | Simple hacer backup o limpiar por trimestre |
+| **Escalable** | Funciona bien con histórico de años |
 
 ## 📊 Estadísticas
 

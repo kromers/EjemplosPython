@@ -95,20 +95,49 @@ El programa reutilizará las credenciales guardadas automáticamente.
 
 ## 📥 Cómo se Descargan los Archivos
 
-Los archivos se organizan por remitente:
+Los archivos se organizan automáticamente en una **estructura cronológica y jerárquica** (Año/Trimestre/Remitente):
 
 ```
 downloads/
-├── usuario1@gmail.com/
-│   ├── documento.pdf
-│   ├── imagen.jpg
-│   └── reporte.xlsx
-├── usuario2@gmail.com/
-│   ├── presentacion.pptx
-│   └── datos.csv
-└── usuario3@gmail.com/
-    └── archivo.zip
+├── 2025/
+│   ├── T1/  (Enero - Marzo)
+│   │   └── usuario1@gmail.com/
+│   │       ├── factura_001.pdf
+│   │       ├── invoice_002.pdf
+│   │       └── factura_003.pdf
+│   ├── T2/  (Abril - Junio)
+│   │   ├── usuario1@gmail.com/
+│   │   │   ├── factura_q2_001.pdf
+│   │   │   └── invoice_q2_002.pdf
+│   │   └── usuario2@gmail.com/
+│   │       └── factura_cliente.pdf
+│   ├── T3/  (Julio - Septiembre)
+│   │   └── usuario1@gmail.com/
+│   │       └── factura_q3_001.pdf
+│   └── T4/  (Octubre - Diciembre)
+│       └── usuario2@gmail.com/
+│           ├── factura_final.pdf
+│           └── invoice_anual.pdf
+└── 2024/
+    └── T4/
+        └── usuario1@gmail.com/
+            └── factura_2024.pdf
 ```
+
+### Ventajas de Esta Estructura
+
+✅ **Cronológica**: Documentos por año y trimestre  
+✅ **Identificación**: Sabe quién envió cada archivo  
+✅ **Búsqueda rápida**: Por período + remitente  
+✅ **Auditoría**: Seguimiento de documentación  
+✅ **Gestión**: Backup o limpieza por trimestre  
+✅ **Escalable**: Histórico de múltiples años
+
+### Filtrado Automático
+
+Solo descarga PDFs con:
+- ✅ Contienen: "factura" o "invoice"
+- ❌ No contienen: "proforma"
 
 ## 📊 Output del Programa
 

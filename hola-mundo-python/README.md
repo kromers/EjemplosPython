@@ -131,20 +131,52 @@ Archivos descargados: 156
 
 ## 📥 Resultado de la Descarga
 
-Los archivos se organizan automáticamente por remitente:
+Los archivos se organizan automáticamente en una estructura **cronológica y jerárquica** (Año/Trimestre/Remitente), ideal para auditoría y gestión documental:
+
+### Estructura Avanzada: Año/Trimestre/Remitente
 
 ```
 downloads/
-├── usuario1@gmail.com/
-│   ├── documento.pdf
-│   ├── imagen.jpg
-│   └── reporte.xlsx
-├── usuario2@gmail.com/
-│   ├── presentacion.pptx
-│   └── datos.csv
-└── usuario3@gmail.com/
-    └── archivo.zip
+├── 2025/
+│   ├── T1/  (Enero - Marzo)
+│   │   └── usuario1@gmail.com/
+│   │       ├── factura_001.pdf
+│   │       ├── invoice_002.pdf
+│   │       └── factura_003.pdf
+│   ├── T2/  (Abril - Junio)
+│   │   ├── usuario1@gmail.com/
+│   │   │   ├── factura_q2_001.pdf
+│   │   │   └── invoice_q2_002.pdf
+│   │   └── usuario2@gmail.com/
+│   │       └── factura_cliente.pdf
+│   ├── T3/  (Julio - Septiembre)
+│   │   └── usuario1@gmail.com/
+│   │       └── factura_q3_001.pdf
+│   └── T4/  (Octubre - Diciembre)
+│       └── usuario2@gmail.com/
+│           ├── factura_final.pdf
+│           └── invoice_anual.pdf
+└── 2024/
+    └── T4/
+        └── usuario1@gmail.com/
+            └── factura_2024.pdf
 ```
+
+### ¿Por Qué Esta Estructura?
+
+- **Cronológica**: Documentos organizados por año y trimestre
+- **Identifica fácilmente el origen**: Sabe quién envió cada archivo
+- **Búsqueda rápida**: Encuentra documentos por período + remitente
+- **Auditoría**: Seguimiento de documentación por período
+- **Gestión sencilla**: Backup o eliminación por trimestre
+- **Escalabilidad**: Funciona bien con histórico de años
+
+### Filtrado Automático
+
+Solo se descargan archivos PDF que cumplen:
+- ✅ Extensión: `.pdf`
+- ✅ Contienen: "factura" o "invoice"
+- ✅ No contienen: "proforma"
 
 ## ❓ Preguntas Frecuentes
 

@@ -58,10 +58,27 @@ Descarga adjuntos de Gmail API.
 - Inicializa el descargador
 - Args:
   - `credentials`: Credenciales de Gmail API
-  - `download_folder`: Carpeta donde guardar archivos
+  - `download_folder`: Carpeta raíz donde guardar archivos (defecto: "downloads")
+- Los archivos se organizan en: `downloads/<Año>/<Trimestre>/<Remitente>/`
 - Ejemplo:
   ```python
-  downloader = GmailAttachmentDownloader(creds, "mis_descargas")
+  downloader = GmailAttachmentDownloader(creds, "documentos")
+  ```
+- Estructura de carpetas resultante:
+  ```
+  documentos/
+  ├── 2025/
+  │   ├── T1/
+  │   │   └── usuario1@gmail.com/
+  │   │       ├── factura_001.pdf
+  │   │       └── invoice_002.pdf
+  │   └── T2/
+  │       └── usuario2@gmail.com/
+  │           └── factura_cliente.pdf
+  └── 2024/
+      └── T4/
+          └── usuario1@gmail.com/
+              └── factura_anual.pdf
   ```
 
 **`download_all_attachments() -> dict`**
@@ -88,13 +105,49 @@ Descarga adjuntos de Gmail API.
 
 **`_download_message_attachments(msg_id: str) -> None`** (privado)
 - Descarga adjuntos de un mensaje específico
+- Extrae: asunto, remitente, fecha del correo
+- Filtra PDFs con palabras clave
 - Args:
   - `msg_id`: ID del mensaje
 
-**`_download_attachment(part, msg_id, subject, sender) -> None`** (privado)
+**`_download_attachment(part, msg_id, subject, sender, email_date) -> None`** (privado)
 - Descarga un adjunto específico
-- Crea carpeta por remitente
+- Filtra: solo PDF con "factura" o "invoice" (sin "proforma")
+- Crea estructura: `<Año>/<Trimestre>/<Remitente>/`
 - Sanitiza nombres de archivo
+- Args:
+  - `part`: Parte del mensaje con adjunto
+  - `msg_id`: ID del mensaje
+  - `subject`: Asunto del correo
+  - `sender`: Remitente del correo
+  - `email_date`: Fecha del correo (datetime)
+
+**`_get_trimester(month: int) -> str`** (estático) ✨ NUEVO
+- Calcula el trimestre basado en el mes
+- Args:
+  - `month`: Número del mes (1-12)
+- Retorna: Trimestre (T1, T2, T3, T4)
+- Mapping:
+  - T1: Enero, Febrero, Marzo (meses 1-3)
+  - T2: Abril, Mayo, Junio (meses 4-6)
+  - T3: Julio, Agosto, Septiembre (meses 7-9)
+  - T4: Octubre, Noviembre, Diciembre (meses 10-12)
+- Ejemplo:
+  ```python
+  trimester = GmailAttachmentDownloader._get_trimester(3)  # T1
+  trimester = GmailAttachmentDownloader._get_trimester(6)  # T2
+  ```
+
+**`_parse_email_date(date_str: str) -> datetime`** (estático) ✨ NUEVO
+- Parsea la fecha del correo en formato RFC 2822
+- Args:
+  - `date_str`: Fecha en formato RFC 2822 (ej: "Mon, 15 Dec 2024 10:30:45 +0000")
+- Retorna: Objeto datetime con la fecha
+- Ejemplo:
+  ```python
+  date = GmailAttachmentDownloader._parse_email_date("Mon, 15 Dec 2024 10:30:45 +0000")
+  # Resultado: datetime(2024, 12, 15, 10, 30, 45)
+  ```
 
 **`_sanitize_filename(filename: str) -> str`** (estático)
 - Elimina caracteres inválidos de nombres
@@ -146,7 +199,7 @@ El diccionario `stats` retornado contiene:
 
 ---
 
-## 🔄 Flujo de Ejecución
+## 🔄 Flujo de Ejecución (Con Estructura Año/Trimestre/Remitente)
 
 ```
 main.py
@@ -160,7 +213,7 @@ main.py
     ↓
 2. GmailAttachmentDownloader.__init__()
     ↓
-    └─ Crear carpeta de descargas
+    └─ Crear carpeta raíz: downloads/
     ↓
 3. downloader.download_all_attachments()
     ↓
@@ -169,14 +222,43 @@ main.py
     │
     ├─ Por cada mensaje:
     │   └─ _download_message_attachments()
-    │       └─ Por cada adjunto:
+    │       ├─ Obtener: asunto, remitente, fecha
+    │       ├─ _parse_email_date() → Extraer fecha
+    │       └─ Por cada adjunto (si es PDF):
     │           └─ _download_attachment()
-    │               ├─ _sanitize_filename()
-    │               └─ Guardar archivo
+    │               ├─ Filtrar: "factura" o "invoice" (sin "proforma")
+    │               ├─ _get_trimester() → T1/T2/T3/T4 según mes
+    │               ├─ Crear ruta: downloads/<Año>/<Trimestre>/<Remitente>/
+    │               ├─ _sanitize_filename() → nombres seguros
+    │               └─ Guardar: downloads/2025/T1/usuario1@gmail.com/factura.pdf
     │
     └─ Retornar stats
+
+Estructura final de carpetas:
+    downloads/
+    ├── 2025/
+    │   ├── T1/
+    │   │   ├── usuario1@gmail.com/
+    │   │   │   ├── factura_001.pdf
+    │   │   │   └── invoice_002.pdf
+    │   │   └── usuario2@gmail.com/
+    │   │       └── factura_cliente.pdf
+    │   ├── T2/
+    │   │   └── usuario1@gmail.com/
+    │   │       ├── factura_q2_001.pdf
+    │   │       └── invoice_q2_002.pdf
+    │   ├── T3/
+    │   │   └── usuario1@gmail.com/
+    │   │       └── factura_q3_001.pdf
+    │   └── T4/
+    │       └── usuario2@gmail.com/
+    │           └── factura_final.pdf
+    └── 2024/
+        └── T4/
+            └── usuario1@gmail.com/
+                └── factura_2024.pdf
     ↓
-4. Mostrar resultados
+4. Mostrar resultados con estadísticas
 ```
 
 ---

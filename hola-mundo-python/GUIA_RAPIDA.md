@@ -58,16 +58,59 @@ hola-mundo-python/
 │   └── gmail_downloader/
 │       ├── __init__.py
 │       ├── auth.py                # Autenticación
-│       └── downloader.py           # Descarga de adjuntos
+│       └── downloader.py           # Descarga con filtrado
 ├── config/
 │   ├── credentials.json.example    # Plantilla
 │   └── credentials.json            # ⚠️ NO compartir
 ├── downloads/                      # 📥 Archivos descargados
+│   ├── 2025/                       # Organizados por año
+│   │   ├── T1/                     # T1, T2, T3, T4
+│   │   │   └── usuario@gmail.com/  # Por remitente
+│   │   ├── T2/
+│   │   ├── T3/
+│   │   └── T4/
+│   └── 2024/
+│       └── T4/
 ├── tests/                          # ✓ Tests unitarios
 ├── requirements.txt                # Dependencias
 ├── setup.sh                        # Script de configuración
 └── README_GMAIL.md                 # Documentación completa
 ```
+
+### Estructura de Descargas (Año/Trimestre/Remitente)
+
+Los archivos se descargan automáticamente organizados cronológicamente:
+
+```
+downloads/
+├── 2025/
+│   ├── T1/  (Enero - Marzo)
+│   │   └── usuario1@gmail.com/
+│   │       ├── factura_001.pdf
+│   │       ├── invoice_002.pdf
+│   │       └── factura_003.pdf
+│   ├── T2/  (Abril - Junio)
+│   │   └── usuario1@gmail.com/
+│   │       ├── factura_q2_001.pdf
+│   │       └── invoice_q2_002.pdf
+│   ├── T3/  (Julio - Septiembre)
+│   │   └── usuario1@gmail.com/
+│   │       └── factura_q3_001.pdf
+│   └── T4/  (Octubre - Diciembre)
+│       └── usuario2@gmail.com/
+│           ├── factura_final.pdf
+│           └── invoice_anual.pdf
+└── 2024/
+    └── T4/
+        └── usuario1@gmail.com/
+            └── factura_2024.pdf
+```
+
+**Ventajas:**
+- ✅ Organización cronológica (año/trimestre)
+- ✅ Identificación del remitente
+- ✅ Búsqueda rápida por período
+- ✅ Ideal para auditoría y cumplimiento
 
 ## Características Principales
 
