@@ -19,9 +19,12 @@ from gmail_downloader.config import ConfigManager
 
 def main():
     """Función principal"""
-    print("=" * 70)
+    print("=" * 90)
     print("🚀 AttachDownloader - Descargador inteligente de adjuntos de Gmail")
-    print("=" * 70)
+    print("     NOTA IMPORTAMTE:")
+    print("     Sólo Ricardo Atienza tiene autorización para usar este software.")
+    print("     Para autorizar su uso a otra persona u empresa, contacta con kromersoft@gmail.com")
+    print("=" * 90)
 
     try:
         # Paso 0: Cargar configuración
@@ -40,6 +43,11 @@ def main():
         print(f"   📂 Carpeta destino: {config.download_folder}")
         print(f"   📋 Estructura: {config.folder_structure}")
         print(f"   🔍 Filtros: {config.white_list if config.white_list else 'ninguno'}")
+        
+        # Mostrar rango de fechas si está configurado
+        if config.date_from or config.date_to:
+            date_range = f"{config.date_from or '∞'} → {config.date_to or '∞'}"
+            print(f"   📅 Rango de fechas: {date_range}")
         
         downloader = GmailAttachmentDownloader(credentials, config)
         stats = downloader.download_all_attachments()

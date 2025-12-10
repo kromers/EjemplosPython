@@ -127,6 +127,10 @@ class GmailAttachmentDownloader:
             )
             email_date = self._parse_email_date(date_str) if date_str else datetime.now()
 
+            # Filtrar por rango de fechas si está configurado
+            if not self._is_date_in_range(email_date):
+                return
+
             # Procesar partes del mensaje
             parts = message["payload"].get("parts", [])
             if not parts:
@@ -229,6 +233,44 @@ class GmailAttachmentDownloader:
 
         except Exception as e:
             print(f"⚠️ Error descargando adjunto {filename}: {e}")
+
+    def _is_date_in_range(self, email_date: datetime) -> bool:
+        """
+        Verifica si la fecha del correo está dentro del rango configurado
+
+        Args:
+            email_date: Fecha del correo
+
+        Returns:
+            bool: True si la fecha está en rango o no hay rango configurado, False si está fuera
+        """
+        # Si no hay rango configurado, aceptar todas las fechas
+        if not self.config.date_from and not self.config.date_to:
+            return True
+        
+        try:
+            # Convertir fecha del correo a naive si es aware para comparación consistente
+            if email_date.tzinfo is not None:
+                email_date = email_date.replace(tzinfo=None)
+            
+            # Parsear fecha_desde si está configurada
+            if self.config.date_from:
+                date_from = datetime.strptime(self.config.date_from, "%Y-%m-%d")
+                if email_date < date_from:
+                    return False
+            
+            # Parsear fecha_hasta si está configurada
+            if self.config.date_to:
+                date_to = datetime.strptime(self.config.date_to, "%Y-%m-%d")
+                # Incluir todo el día: hasta las 23:59:59
+                date_to = date_to.replace(hour=23, minute=59, second=59)
+                if email_date > date_to:
+                    return False
+            
+            return True
+        except Exception as e:
+            print(f"⚠️ Error al parsear rango de fechas: {e}")
+            return True
 
     @staticmethod
     def _get_trimester(month: int) -> str:

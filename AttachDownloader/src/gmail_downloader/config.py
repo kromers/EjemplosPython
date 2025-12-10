@@ -32,7 +32,9 @@ class ConfigManager:
             )
 
         try:
-            self.config.read(self.config_file)
+            # Forzar lectura con utf-8 para evitar errores de decodificación
+            with open(self.config_file, encoding="utf-8") as f:
+                self.config.read_file(f)
         except Exception as e:
             raise ValueError(f"Error al parsear config.cfg: {e}")
 
