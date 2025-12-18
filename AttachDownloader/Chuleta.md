@@ -5,6 +5,11 @@ git config --global user.name javitrapero
 # Terminal
 Abrir un nuevo terminal: Ctrl + j
 
+# Productivizar
+pip install pyinstaller
+pyinstaller --onefile src/main.py
+
+
 # Entornos virtuales
 python -m venv <nombreEntorno>
 ```
